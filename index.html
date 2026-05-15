@@ -1,0 +1,979 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💕 Nosso Amor 💕</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Lato:wght@300;400;700&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --pink-light: #ffd6e0;
+      --pink-mid:   #ffb3c6;
+      --pink-deep:  #ff85a1;
+      --pink-hot:   #e63375;
+      --red:        #c9184a;
+      --white:      #fff9fb;
+      --shadow:     rgba(200,24,74,0.18);
+      --paper-bg:   #fdf6e3;
+      --paper-line: #e8d5b0;
+      --ink:        #3d2b1f;
+      --ink-light:  #6b4c3b;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg,#ffe0ec 0%,#ffd6f5 50%,#ffe0ec 100%);
+      font-family: 'Lato', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── Corações ── */
+    #hearts-container {
+      position: fixed; top:0; left:0;
+      width:100%; height:100%;
+      pointer-events:none; z-index:0; overflow:hidden;
+    }
+    .heart {
+      position: absolute; bottom:-60px; font-size: 1.4rem;
+      animation: floatUp linear infinite; opacity: 0;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0) rotate(0deg);       opacity:.8; }
+      100% { transform: translateY(-110vh) rotate(360deg); opacity:0;  }
+    }
+
+    /* ═══════════════════════════════════
+       BOTÃO FLUTUANTE DE CADEADO
+    ═══════════════════════════════════ */
+    #lockBtn {
+      position: fixed;
+      bottom: 22px; right: 22px;
+      z-index: 999;
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, var(--pink-hot), var(--red));
+      color: #fff;
+      font-size: 1.4rem;
+      cursor: pointer;
+      box-shadow: 0 4px 18px var(--shadow);
+      transition: transform .2s, box-shadow .2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #lockBtn:hover { transform: scale(1.12); box-shadow: 0 8px 24px var(--shadow); }
+    #lockBtn title { display:none; }
+
+    /* Tooltip do cadeado */
+    #lockBtn::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: 58px; right: 0;
+      background: rgba(60,20,30,.85);
+      color: #fff;
+      font-size: .72rem;
+      font-family: 'Lato', sans-serif;
+      padding: 4px 10px;
+      border-radius: 8px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+    }
+    #lockBtn:hover::after { opacity: 1; }
+
+    /* ═══════════════════════════════════
+       MODAL DE SENHA
+    ═══════════════════════════════════ */
+    #pwdOverlay {
+      display: none;
+      position: fixed; inset:0; z-index: 1000;
+      background: rgba(60,10,30,.55);
+      backdrop-filter: blur(6px);
+      align-items: center; justify-content: center;
+    }
+    #pwdOverlay.open { display: flex; }
+
+    .pwd-box {
+      background: rgba(255,255,255,.95);
+      border-radius: 22px;
+      padding: 36px 32px;
+      max-width: 340px; width: 90%;
+      box-shadow: 0 12px 40px rgba(180,20,60,.25);
+      border: 1.5px solid var(--pink-mid);
+      text-align: center;
+      animation: popIn .3s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes popIn {
+      from { transform: scale(.85); opacity:0; }
+      to   { transform: scale(1);   opacity:1; }
+    }
+    .pwd-box h3 {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.7rem; color: var(--red);
+      margin-bottom: 6px;
+    }
+    .pwd-box p {
+      font-size: .88rem; color: #a06070;
+      margin-bottom: 20px;
+    }
+    .pwd-input-wrap {
+      position: relative; margin-bottom: 16px;
+    }
+    #pwdInput {
+      width: 100%;
+      border: 2px solid var(--pink-mid);
+      border-radius: 50px;
+      padding: 10px 44px 10px 18px;
+      font-size: 1rem;
+      font-family: 'Lato', sans-serif;
+      outline: none;
+      color: var(--ink);
+      transition: border-color .2s;
+      background: var(--white);
+    }
+    #pwdInput:focus { border-color: var(--red); }
+    #pwdInput.shake {
+      animation: shake .35s ease;
+      border-color: var(--red);
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%,60% { transform: translateX(-7px); }
+      40%,80% { transform: translateX(7px); }
+    }
+    #togglePwd {
+      position: absolute; right: 14px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      cursor: pointer; font-size: 1.1rem; color: #b09090;
+    }
+    .pwd-error {
+      font-size: .8rem; color: var(--red);
+      margin-bottom: 12px; min-height: 1.1em;
+    }
+    .pwd-actions { display: flex; gap: 10px; justify-content: center; }
+    .pwd-btn {
+      border: none; border-radius: 50px;
+      padding: 9px 24px; font-size: .9rem;
+      font-weight: 700; cursor: pointer;
+      font-family: 'Lato', sans-serif;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .pwd-btn.ok {
+      background: linear-gradient(135deg,var(--pink-hot),var(--red));
+      color: #fff; box-shadow: 0 4px 14px var(--shadow);
+    }
+    .pwd-btn.cancel {
+      background: rgba(255,255,255,.8);
+      color: var(--red);
+      border: 1.5px solid var(--pink-mid);
+    }
+    .pwd-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px var(--shadow); }
+
+    /* ── Banner modo edição ── */
+    #editBanner {
+      display: none;
+      background: linear-gradient(135deg,var(--pink-hot),var(--red));
+      color: #fff;
+      text-align: center;
+      padding: 9px 16px;
+      font-size: .88rem;
+      font-weight: 700;
+      letter-spacing: .4px;
+      position: sticky; top:0; z-index: 100;
+      box-shadow: 0 2px 12px var(--shadow);
+    }
+    #editBanner.show { display: block; }
+
+    /* ═══════════════════════════════════
+       ELEMENTOS QUE FICAM OCULTOS NO MODO VISUALIZAÇÃO
+       Classe .edit-only: some quando travado
+    ═══════════════════════════════════ */
+    body.view-mode .edit-only {
+      display: none !important;
+    }
+
+    /* ── Layout ── */
+    .container {
+      position: relative; z-index:1;
+      max-width: 860px; margin:0 auto;
+      padding: 40px 20px 90px;
+      display: flex; flex-direction: column; gap:40px;
+    }
+    h2 {
+      font-family: 'Dancing Script', cursive;
+      font-size: 2rem; color: var(--red);
+      text-align:center; margin-bottom:20px;
+      text-shadow: 1px 2px 6px var(--shadow);
+    }
+    .music-section, .photos-section, .letter-section {
+      background: rgba(255,255,255,0.72);
+      backdrop-filter: blur(10px);
+      border-radius: 24px; padding: 36px 32px;
+      box-shadow: 0 8px 32px var(--shadow);
+      border: 1.5px solid var(--pink-mid);
+    }
+
+    /* ── Music ── */
+    .music-player { display:flex; flex-direction:column; align-items:center; gap:18px; }
+    .music-controls { display:flex; align-items:center; gap:14px; flex-wrap:wrap; justify-content:center; }
+    .file-input { display:none; }
+    .upload-btn {
+      display:inline-flex; align-items:center; gap:6px;
+      background: linear-gradient(135deg,var(--pink-hot),var(--red));
+      color:#fff; padding:10px 22px; border-radius:50px;
+      cursor:pointer; font-size:.95rem; font-weight:700;
+      letter-spacing:.4px; transition:transform .2s,box-shadow .2s;
+      box-shadow: 0 4px 14px var(--shadow);
+    }
+    .upload-btn:hover { transform:translateY(-2px) scale(1.04); box-shadow:0 8px 22px var(--shadow); }
+    #audioPlayer { width:100%; max-width:420px; border-radius:50px; accent-color:var(--red); }
+
+    /* ── Carousel ── */
+    .upload-section { display:flex; justify-content:center; margin-bottom:24px; }
+    .carousel { display:flex; flex-direction:column; align-items:center; gap:16px; }
+    .carousel-container {
+      width:100%; overflow:hidden; border-radius:18px;
+      box-shadow:0 6px 24px var(--shadow);
+      background:var(--pink-light); min-height:240px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .carousel-inner { display:flex; transition:transform .5s cubic-bezier(.4,0,.2,1); }
+    .carousel-inner img {
+      min-width:100%; max-height:460px;
+      object-fit:contain; border-radius:18px; user-select:none;
+    }
+    .empty-msg {
+      color:var(--pink-hot); font-family:'Dancing Script',cursive;
+      font-size:1.3rem; padding:40px 20px; text-align:center;
+    }
+    .carousel-nav { display:flex; gap:16px; justify-content:center; }
+    .carousel-btn {
+      background: linear-gradient(135deg,var(--pink-hot),var(--red));
+      color:#fff; border:none; padding:10px 24px;
+      border-radius:50px; font-size:.92rem; font-weight:700;
+      cursor:pointer; transition:transform .2s,box-shadow .2s;
+      box-shadow:0 4px 14px var(--shadow);
+    }
+    .carousel-btn:hover { transform:translateY(-2px) scale(1.05); box-shadow:0 8px 20px var(--shadow); }
+    .carousel-btn:disabled { opacity:.4; cursor:default; transform:none; }
+    .carousel-dots { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+    .dot { width:10px; height:10px; border-radius:50%; background:var(--pink-mid); cursor:pointer; transition:background .3s,transform .2s; }
+    .dot.active { background:var(--red); transform:scale(1.3); }
+
+    /* ── Carta ── */
+    .letter-section { position: relative; overflow: hidden; }
+    .letter-section::before, .letter-section::after {
+      content: '🌹'; position: absolute; font-size: 2.2rem;
+      opacity: .18; pointer-events: none;
+    }
+    .letter-section::before { top:14px; left:18px; transform: rotate(-20deg); }
+    .letter-section::after  { bottom:14px; right:18px; transform: rotate(15deg); }
+
+    .letter-tabs { display:flex; justify-content:center; gap:10px; margin-bottom:24px; }
+    .tab-btn {
+      background: transparent; border: 2px solid var(--pink-mid);
+      color: var(--red); padding: 7px 22px; border-radius: 50px;
+      font-size: .9rem; font-weight: 700; cursor: pointer;
+      transition: all .2s; font-family: 'Lato', sans-serif;
+    }
+    .tab-btn.active, .tab-btn:hover {
+      background: linear-gradient(135deg,var(--pink-hot),var(--red));
+      color: #fff; border-color: transparent;
+      box-shadow: 0 4px 14px var(--shadow);
+    }
+    .letter-editor-wrap { position: relative; }
+    .letter-header-fields { display:flex; gap:16px; margin-bottom:14px; flex-wrap:wrap; }
+    .letter-field-group { display:flex; align-items:center; gap:8px; flex:1; min-width:160px; }
+    .letter-field-group label {
+      font-family:'Caveat',cursive; font-size:1.1rem;
+      color:var(--ink-light); white-space:nowrap;
+    }
+    .letter-field-group input {
+      flex:1; border:none; border-bottom:1.5px solid var(--paper-line);
+      background:transparent; font-family:'Caveat',cursive;
+      font-size:1.1rem; color:var(--ink); outline:none; padding:2px 4px;
+    }
+    .letter-field-group input::placeholder { color:#c4a882; }
+    #letterText {
+      width:100%; min-height:220px; resize:vertical;
+      font-family:'Caveat',cursive; font-size:1.2rem; line-height:2.1;
+      color:var(--ink); background:transparent; border:none; outline:none;
+      padding:6px 4px; position:relative; z-index:2;
+    }
+    .paper-bg {
+      background-color:var(--paper-bg); border-radius:14px;
+      padding:20px 22px 20px 56px; position:relative;
+      box-shadow: inset 0 0 60px rgba(180,140,80,.08), 0 3px 14px rgba(0,0,0,.07);
+      background-image: repeating-linear-gradient(
+        transparent, transparent calc(2.1em - 1px),
+        var(--paper-line) calc(2.1em - 1px), var(--paper-line) 2.1em);
+      background-attachment: local;
+    }
+    .paper-bg::before {
+      content:''; position:absolute; top:0; left:40px;
+      width:1.5px; height:100%;
+      background:rgba(230,60,60,.22); border-radius:1px;
+    }
+    .paper-holes {
+      position:absolute; top:0; left:0; width:36px; height:100%;
+      display:flex; flex-direction:column; align-items:center;
+      justify-content:space-evenly; padding:24px 0; pointer-events:none;
+    }
+    .hole {
+      width:14px; height:14px; border-radius:50%;
+      background:rgba(255,255,255,0.72);
+      box-shadow:inset 0 1px 3px rgba(0,0,0,.18),0 1px 0 rgba(255,255,255,.7);
+    }
+    .tea-stain {
+      position:absolute; width:90px; height:70px; border-radius:50%;
+      background:radial-gradient(ellipse,rgba(180,130,60,.09) 0%,transparent 70%);
+      pointer-events:none;
+    }
+    .char-count { text-align:right; font-size:.78rem; color:#b09070; margin-top:6px; font-style:italic; }
+    .letter-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:20px; }
+    .letter-btn {
+      display:inline-flex; align-items:center; gap:6px; border:none;
+      padding:10px 22px; border-radius:50px; font-size:.92rem; font-weight:700;
+      cursor:pointer; transition:transform .2s,box-shadow .2s; font-family:'Lato',sans-serif;
+    }
+    .letter-btn.primary { background:linear-gradient(135deg,var(--pink-hot),var(--red)); color:#fff; box-shadow:0 4px 14px var(--shadow); }
+    .letter-btn.secondary { background:rgba(255,255,255,.8); color:var(--red); border:1.5px solid var(--pink-mid); }
+    .letter-btn:hover { transform:translateY(-2px) scale(1.04); box-shadow:0 8px 20px var(--shadow); }
+    .typing-cursor {
+      display:inline-block; width:2px; height:1.2em; background:var(--ink);
+      margin-left:1px; vertical-align:middle; animation:blink .75s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    #letterPreview { display:none; position:relative; }
+    .preview-paper {
+      background-color:var(--paper-bg); border-radius:14px;
+      padding:28px 32px 28px 60px; position:relative;
+      box-shadow:inset 0 0 80px rgba(180,140,80,.10),0 4px 20px rgba(0,0,0,.10);
+      background-image:repeating-linear-gradient(
+        transparent,transparent calc(2.1em - 1px),
+        var(--paper-line) calc(2.1em - 1px),var(--paper-line) 2.1em);
+      min-height:280px;
+    }
+    .preview-paper::before {
+      content:''; position:absolute; top:0; left:44px;
+      width:1.5px; height:100%; background:rgba(230,60,60,.22);
+    }
+    .preview-to, .preview-from {
+      font-family:'Caveat',cursive; font-size:1.15rem; color:var(--ink-light); line-height:1.6;
+    }
+    .preview-to { margin-bottom:10px; }
+    .preview-from { margin-top:18px; text-align:right; }
+    #typedText {
+      font-family:'Caveat',cursive; font-size:1.22rem; color:var(--ink);
+      line-height:2.1; white-space:pre-wrap; word-break:break-word; min-height:60px;
+    }
+    .wax-seal {
+      position:absolute; bottom:-22px; right:28px; font-size:2.8rem;
+      filter:drop-shadow(0 3px 6px rgba(180,20,60,.3));
+      animation:sealPop .5s ease; transform-origin:center bottom;
+    }
+    @keyframes sealPop {
+      0%   { transform:scale(0) rotate(-15deg); opacity:0; }
+      70%  { transform:scale(1.15) rotate(5deg); opacity:1; }
+      100% { transform:scale(1) rotate(0deg); }
+    }
+    .letter-ribbon {
+      text-align:center; font-size:.85rem; color:#b09070;
+      font-style:italic; margin-top:32px; letter-spacing:.5px;
+    }
+    @keyframes unfold {
+      0%   { transform:scaleY(0.1) translateY(-30px); opacity:0; }
+      100% { transform:scaleY(1)   translateY(0);     opacity:1; }
+    }
+    .unfold { animation:unfold .45s cubic-bezier(.4,0,.2,1) forwards; }
+
+    /* ── view-mode: esconde editor e abas, mostra só o preview ── */
+    body.view-mode #letterEditor  { display: none !important; }
+    body.view-mode .letter-tabs   { display: none !important; }
+    body.view-mode #letterPreview { display: block !important; }
+
+    /* Botão "Reler a Carta" visível no view-mode */
+    #readLetterBtn {
+      display: none;
+      margin: 0 auto 24px;
+    }
+    body.view-mode #readLetterBtn { display: flex; justify-content: center; }
+    body:not(.view-mode) #readLetterBtn { display: none !important; }
+
+    /* Placeholder quando ainda não há carta salva */
+    #letterEmptyMsg {
+      text-align: center;
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.2rem;
+      color: var(--pink-hot);
+      padding: 30px 0 10px;
+    }
+
+    /* ── Banner Topo ── */
+    .top-banner {
+      position: relative; z-index: 2;
+      text-align: center;
+      padding: 22px 16px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+    .top-banner-text {
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(2rem, 6vw, 3.4rem);
+      font-weight: 700;
+      color: var(--red);
+      text-shadow: 2px 3px 10px var(--shadow), 0 0 30px rgba(230,51,117,.18);
+      letter-spacing: .5px;
+      animation: pulseText 3s ease-in-out infinite;
+    }
+    .top-banner-emoji {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      animation: beatHeart 1.2s ease-in-out infinite;
+      display: inline-block;
+    }
+    .top-banner-emoji:last-child {
+      animation-delay: .6s;
+    }
+    @keyframes pulseText {
+      0%,100% { text-shadow: 2px 3px 10px var(--shadow); }
+      50%      { text-shadow: 2px 3px 18px rgba(201,24,74,.45), 0 0 40px rgba(230,51,117,.25); }
+    }
+    @keyframes beatHeart {
+      0%,100% { transform: scale(1); }
+      14%     { transform: scale(1.25); }
+      28%     { transform: scale(1); }
+      42%     { transform: scale(1.15); }
+    }
+
+    @media (max-width:600px) {
+      .music-section,.photos-section,.letter-section { padding:24px 16px; }
+      h2 { font-size:1.55rem; }
+      .carousel-inner img { max-height:280px; }
+      .paper-bg,.preview-paper { padding-left:44px; }
+      #lockBtn { bottom:14px; right:14px; }
+    }
+  </style>
+</head>
+<body class="view-mode">
+
+  <!-- Banner modo edição -->
+  <div id="editBanner">
+    ✏️ Modo de Edição Ativado — os botões de edição estão visíveis apenas para você
+  </div>
+
+  <div id="hearts-container"></div>
+
+  <!-- Botão flutuante de cadeado -->
+  <button id="lockBtn" data-tip="Modo de edição" onclick="toggleLock()">🔒</button>
+
+  <!-- Banner topo -->
+  <div class="top-banner">
+    <span class="top-banner-emoji">💕</span>
+    <span class="top-banner-text">Feliz 5 Meses de Namoro</span>
+    <span class="top-banner-emoji">💕</span>
+  </div>
+
+  <div class="container">
+
+    <!-- ── Música ── -->
+    <div class="music-section">
+      <div class="music-player">
+        <h2>🎵 Trilha Sonora do Nosso Amor</h2>
+        <!-- Botão de upload: só aparece no modo edição -->
+        <div class="music-controls edit-only">
+          <input type="file" id="musicInput" accept="audio/*" class="file-input">
+          <label for="musicInput" class="upload-btn">📤 Carregar Música</label>
+        </div>
+        <audio id="audioPlayer" controls>
+          <source src="" type="audio/mpeg">
+          Seu navegador não suporta áudio.
+        </audio>
+      </div>
+    </div>
+
+    <!-- ── Fotos ── -->
+    <div class="photos-section">
+      <h2>📸 Nossa Galeria de Momentos</h2>
+      <!-- Botão de upload: só aparece no modo edição -->
+      <div class="upload-section edit-only">
+        <input type="file" id="photoInput" accept="image/*" multiple class="file-input">
+        <label for="photoInput" class="upload-btn">📤 Carregar Fotos</label>
+      </div>
+      <div class="carousel">
+        <div class="carousel-container">
+          <div class="carousel-inner" id="carouselInner">
+            <p class="empty-msg">💕 Carregue suas fotos favoritas aqui 💕</p>
+          </div>
+        </div>
+        <div class="carousel-nav">
+          <button class="carousel-btn" id="prevBtn" disabled>❤️ Anterior</button>
+          <button class="carousel-btn" id="nextBtn" disabled>Próximo 💖</button>
+        </div>
+      </div>
+      <div class="carousel-dots" id="dotsContainer"></div>
+    </div>
+
+    <!-- ── Carta de Amor ── -->
+    <div class="letter-section">
+      <h2>💌 Carta de Amor</h2>
+
+      <!-- Abas: só no modo edição -->
+      <div class="letter-tabs edit-only">
+        <button class="tab-btn active" id="tabWrite" onclick="switchTab('write')">✏️ Escrever</button>
+        <button class="tab-btn" id="tabPreview" onclick="switchTab('preview')">👁️ Ler Carta</button>
+      </div>
+
+      <!-- Botão "Reler" sempre visível no modo visualização -->
+      <div id="readLetterBtn">
+        <button class="letter-btn secondary" onclick="replayLetter()">🔁 Reler a Carta</button>
+      </div>
+
+      <!-- Editor: só aparece no modo edição -->
+      <div id="letterEditor" class="edit-only">
+        <div class="letter-header-fields">
+          <div class="letter-field-group">
+            <label>Para:</label>
+            <input type="text" id="letterTo" placeholder="nome de quem vai receber..." maxlength="40">
+          </div>
+          <div class="letter-field-group">
+            <label>De:</label>
+            <input type="text" id="letterFrom" placeholder="seu nome..." maxlength="40">
+          </div>
+        </div>
+        <div class="paper-bg letter-editor-wrap">
+          <div class="paper-holes">
+            <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+          </div>
+          <div class="tea-stain" style="top:10px;right:24px;"></div>
+          <div class="tea-stain" style="bottom:20px;left:60px;width:60px;height:50px;"></div>
+          <textarea id="letterText"
+            placeholder="Escreva aqui sua mensagem de amor... cada palavra é um abraço 💕"
+            maxlength="1200" spellcheck="true"></textarea>
+        </div>
+        <p class="char-count"><span id="charCount">0</span> / 1200 caracteres</p>
+        <div class="letter-actions">
+          <!-- Botões de ação da carta: só no modo edição -->
+          <button class="letter-btn secondary edit-only" onclick="clearLetter()">🗑️ Limpar</button>
+          <button class="letter-btn primary" onclick="switchTab('preview')">💌 Ver Minha Carta</button>
+        </div>
+      </div>
+
+      <!-- Prévia -->
+      <div id="letterPreview">
+        <div class="preview-paper unfold">
+          <div class="paper-holes">
+            <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+          </div>
+          <div class="tea-stain" style="top:10px;right:30px;"></div>
+          <p class="preview-to" id="previewTo"></p>
+          <div id="typedText"></div><span class="typing-cursor" id="typingCursor"></span>
+          <p class="preview-from" id="previewFrom"></p>
+          <div class="wax-seal" id="waxSeal" style="display:none">💋</div>
+        </div>
+        <p class="letter-ribbon">— escrita com todo o amor do mundo 🌹 —</p>
+        <div class="letter-actions">
+          <!-- "Editar" só aparece no modo edição; "Imprimir" sempre visível -->
+          <button class="letter-btn secondary edit-only" onclick="switchTab('write')">✏️ Editar</button>
+          <button class="letter-btn primary" onclick="printLetter()">🖨️ Imprimir</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- fim container -->
+
+  <!-- Modal de senha -->
+  <div id="pwdOverlay" role="dialog" aria-modal="true">
+    <div class="pwd-box">
+      <h3 id="pwdTitle">🔐 Modo de Edição</h3>
+      <p id="pwdSubtitle">Digite sua senha para editar a página</p>
+      <div class="pwd-input-wrap">
+        <input type="password" id="pwdInput" placeholder="Senha..."
+               maxlength="30" autocomplete="off"
+               onkeydown="if(event.key==='Enter') confirmPwd()">
+        <button id="togglePwd" type="button" onclick="togglePwdVis()" aria-label="Mostrar senha">👁️</button>
+      </div>
+      <p class="pwd-error" id="pwdError"></p>
+      <div class="pwd-actions">
+        <button class="pwd-btn cancel" onclick="closePwdModal()">Cancelar</button>
+        <button class="pwd-btn ok" onclick="confirmPwd()">Confirmar 💕</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  /* ══════════════════════════════════════
+     SENHA — padrão: "amor" (mude aqui!)
+  ══════════════════════════════════════ */
+  const EDIT_PASSWORD = 'amor';
+
+  /* ══════════════════════════════════════
+     MODO DE EDIÇÃO / VISUALIZAÇÃO
+  ══════════════════════════════════════ */
+  let isEditMode = false;
+
+  function toggleLock() {
+    if (isEditMode) {
+      // Travar: volta ao modo visualização direto (sem senha)
+      setViewMode();
+    } else {
+      // Destravar: pede senha
+      openPwdModal();
+    }
+  }
+
+  function setViewMode() {
+    isEditMode = false;
+    document.body.classList.add('view-mode');
+    document.getElementById('lockBtn').textContent = '🔒';
+    document.getElementById('lockBtn').setAttribute('data-tip', 'Entrar no modo de edição');
+    document.getElementById('editBanner').classList.remove('show');
+    // Garante que a carta fique na aba de preview
+    if (document.getElementById('letterText').value.trim()) {
+      showPreview();
+    }
+  }
+
+  function setEditMode() {
+    isEditMode = true;
+    document.body.classList.remove('view-mode');
+    document.getElementById('lockBtn').textContent = '🔓';
+    document.getElementById('lockBtn').setAttribute('data-tip', 'Travar (esconder botões)');
+    document.getElementById('editBanner').classList.add('show');
+  }
+
+  /* ── Modal de senha ── */
+  function openPwdModal() {
+    document.getElementById('pwdInput').value = '';
+    document.getElementById('pwdError').textContent = '';
+    document.getElementById('pwdOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('pwdInput').focus(), 80);
+  }
+  function closePwdModal() {
+    document.getElementById('pwdOverlay').classList.remove('open');
+  }
+  function confirmPwd() {
+    const val = document.getElementById('pwdInput').value;
+    if (val === EDIT_PASSWORD) {
+      closePwdModal();
+      setEditMode();
+    } else {
+      const inp = document.getElementById('pwdInput');
+      inp.classList.remove('shake');
+      void inp.offsetWidth;
+      inp.classList.add('shake');
+      document.getElementById('pwdError').textContent = '❌ Senha incorreta, tente novamente';
+      inp.value = '';
+      inp.focus();
+    }
+  }
+  function togglePwdVis() {
+    const inp = document.getElementById('pwdInput');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+  // Fechar ao clicar fora
+  document.getElementById('pwdOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closePwdModal();
+  });
+
+  /* ══════════════════════════════════════
+     CORAÇÕES FLUTUANTES
+  ══════════════════════════════════════ */
+  const heartsContainer = document.getElementById('hearts-container');
+  const heartSymbols = ['❤️','💕','💖','💗','💓','💞','🌸','💝'];
+  function spawnHeart() {
+    const el = document.createElement('span');
+    el.classList.add('heart');
+    el.textContent = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
+    el.style.left = Math.random() * 100 + 'vw';
+    const dur = 5 + Math.random() * 7;
+    el.style.animationDuration = dur + 's';
+    el.style.fontSize = (0.9 + Math.random() * 1.4) + 'rem';
+    el.style.animationDelay = (Math.random() * 2) + 's';
+    heartsContainer.appendChild(el);
+    setTimeout(() => el.remove(), (dur + 3) * 1000);
+  }
+  setInterval(spawnHeart, 700);
+
+  /* ══════════════════════════════════════
+     PLAYER DE MÚSICA
+  ══════════════════════════════════════ */
+  const musicInput  = document.getElementById('musicInput');
+  const audioPlayer = document.getElementById('audioPlayer');
+  musicInput.addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file) return;
+    audioPlayer.src = URL.createObjectURL(file);
+    audioPlayer.play();
+  });
+
+  /* ══════════════════════════════════════
+     CARROSSEL
+  ══════════════════════════════════════ */
+  const photoInput    = document.getElementById('photoInput');
+  const carouselInner = document.getElementById('carouselInner');
+  const dotsContainer = document.getElementById('dotsContainer');
+  const prevBtn       = document.getElementById('prevBtn');
+  const nextBtn       = document.getElementById('nextBtn');
+  let images = [], current = 0;
+
+  photoInput.addEventListener('change', function () {
+    const files = Array.from(this.files);
+    if (!files.length) return;
+    let loaded = 0;
+    const newImages = new Array(files.length);
+    files.forEach((file, i) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        newImages[i] = e.target.result;
+        if (++loaded === files.length) {
+          images = [...images, ...newImages];
+          buildCarousel();
+          goTo(images.length - files.length);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  function buildCarousel() {
+    carouselInner.innerHTML = '';
+    dotsContainer.innerHTML = '';
+    images.forEach((src, idx) => {
+      const img = document.createElement('img');
+      img.src = src; img.alt = `Foto ${idx + 1}`;
+      carouselInner.appendChild(img);
+      const dot = document.createElement('span');
+      dot.classList.add('dot');
+      dot.addEventListener('click', () => goTo(idx));
+      dotsContainer.appendChild(dot);
+    });
+    updateNav();
+  }
+  function goTo(index) {
+    current = Math.max(0, Math.min(index, images.length - 1));
+    carouselInner.style.transform = `translateX(-${current * 100}%)`;
+    updateNav();
+  }
+  function updateNav() {
+    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current >= images.length - 1 || images.length === 0;
+  }
+  prevBtn.addEventListener('click', () => goTo(current - 1));
+  nextBtn.addEventListener('click', () => goTo(current + 1));
+  let touchStartX = 0;
+  carouselInner.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  carouselInner.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) diff > 0 ? goTo(current + 1) : goTo(current - 1);
+  });
+
+  /* ══════════════════════════════════════
+     CARTA DE AMOR
+  ══════════════════════════════════════ */
+  const letterText = document.getElementById('letterText');
+  const charCount  = document.getElementById('charCount');
+
+  letterText.addEventListener('input', () => { charCount.textContent = letterText.value.length; });
+  letterText.addEventListener('input', saveToStorage);
+  document.getElementById('letterTo').addEventListener('input', saveToStorage);
+  document.getElementById('letterFrom').addEventListener('input', saveToStorage);
+
+  function saveToStorage() {
+    localStorage.setItem('love_letter_text', letterText.value);
+    localStorage.setItem('love_letter_to',   document.getElementById('letterTo').value);
+    localStorage.setItem('love_letter_from', document.getElementById('letterFrom').value);
+  }
+
+  // Restaurar ao carregar
+  (function restore() {
+    const t    = localStorage.getItem('love_letter_text');
+    const to   = localStorage.getItem('love_letter_to');
+    const from = localStorage.getItem('love_letter_from');
+    if (t)    { letterText.value = t; charCount.textContent = t.length; }
+    if (to)   document.getElementById('letterTo').value   = to;
+    if (from) document.getElementById('letterFrom').value = from;
+    // Sempre exibe o preview no modo visualização
+    if (t && t.trim()) {
+      setTimeout(() => showPreview(), 400);
+    } else {
+      // Sem carta salva: mostra mensagem vazia
+      document.getElementById('letterPreview').style.display = 'block';
+      document.getElementById('previewTo').textContent = '';
+      document.getElementById('previewFrom').textContent = '';
+      document.getElementById('typedText').textContent = '';
+      document.getElementById('typingCursor').style.display = 'none';
+    }
+  })();
+
+  function clearLetter() {
+    if (!confirm('Apagar a carta? Esta ação não pode ser desfeita. 💔')) return;
+    letterText.value = '';
+    document.getElementById('letterTo').value   = '';
+    document.getElementById('letterFrom').value = '';
+    charCount.textContent = '0';
+    localStorage.removeItem('love_letter_text');
+    localStorage.removeItem('love_letter_to');
+    localStorage.removeItem('love_letter_from');
+    document.getElementById('letterPreview').style.display = 'none';
+    document.getElementById('letterEditor').style.display = '';
+  }
+
+  /* ── Mostrar preview (sem animação de digitação, para visualização) ── */
+  function showPreview() {
+    const text = letterText.value.trim();
+    if (!text) return;
+    const to   = document.getElementById('letterTo').value.trim();
+    const from = document.getElementById('letterFrom').value.trim();
+    document.getElementById('previewTo').textContent   = to   ? `Meu(a) amado(a) ${to},`         : 'Meu amor,';
+    document.getElementById('previewFrom').textContent = from ? `Com todo o meu amor, ${from} 💕` : 'Com todo o meu amor 💕';
+    document.getElementById('letterPreview').style.display = 'block';
+    startTyping(text);
+  }
+
+  /* Botão "Ler a Carta" no modo visualização — reinicia a animação */
+  function replayLetter() {
+    const text = localStorage.getItem('love_letter_text') || '';
+    const to   = localStorage.getItem('love_letter_to')   || '';
+    const from = localStorage.getItem('love_letter_from') || '';
+    if (!text.trim()) return;
+    document.getElementById('previewTo').textContent   = to   ? `Meu(a) amado(a) ${to},`         : 'Meu amor,';
+    document.getElementById('previewFrom').textContent = from ? `Com todo o meu amor, ${from} 💕` : 'Com todo o meu amor 💕';
+    document.getElementById('letterPreview').style.display = 'block';
+    startTyping(text);
+  }
+
+  let typingTimer = null;
+
+  function switchTab(tab) {
+    const writeTab   = document.getElementById('letterEditor');
+    const previewTab = document.getElementById('letterPreview');
+    const tabWrite   = document.getElementById('tabWrite');
+    const tabPreview = document.getElementById('tabPreview');
+
+    if (tab === 'preview') {
+      const text = letterText.value.trim();
+      if (!text) {
+        letterText.focus();
+        letterText.style.outline = '2px solid var(--red)';
+        setTimeout(() => letterText.style.outline = '', 1200);
+        return;
+      }
+      writeTab.style.display   = 'none';
+      previewTab.style.display = 'block';
+      tabWrite.classList.remove('active');
+      tabPreview.classList.add('active');
+      const to   = document.getElementById('letterTo').value.trim();
+      const from = document.getElementById('letterFrom').value.trim();
+      document.getElementById('previewTo').textContent   = to   ? `Meu(a) amado(a) ${to},`         : 'Meu amor,';
+      document.getElementById('previewFrom').textContent = from ? `Com todo o meu amor, ${from} 💕` : 'Com todo o meu amor 💕';
+      startTyping(text);
+    } else {
+      if (typingTimer) { clearTimeout(typingTimer); typingTimer = null; }
+      writeTab.style.display   = '';
+      previewTab.style.display = 'none';
+      tabWrite.classList.add('active');
+      tabPreview.classList.remove('active');
+      document.getElementById('waxSeal').style.display = 'none';
+    }
+  }
+
+  function startTyping(fullText) {
+    const target = document.getElementById('typedText');
+    const cursor = document.getElementById('typingCursor');
+    const seal   = document.getElementById('waxSeal');
+    if (typingTimer) { clearTimeout(typingTimer); typingTimer = null; }
+    target.textContent = '';
+    cursor.style.display = 'inline-block';
+    seal.style.display   = 'none';
+    const paper = document.querySelector('.preview-paper');
+    paper.classList.remove('unfold'); void paper.offsetWidth; paper.classList.add('unfold');
+    let i = 0;
+    const speed = Math.max(18, Math.min(55, Math.round(4000 / fullText.length)));
+    function type() {
+      if (i < fullText.length) {
+        target.textContent += fullText[i++];
+        typingTimer = setTimeout(type, speed);
+      } else {
+        cursor.style.display = 'none';
+        seal.style.display   = 'block';
+      }
+    }
+    type();
+  }
+
+  function printLetter() {
+    const to   = document.getElementById('previewTo').textContent;
+    const from = document.getElementById('previewFrom').textContent;
+    const body = document.getElementById('typedText').textContent;
+    const win  = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html><html><head>
+      <meta charset="UTF-8"><title>Carta de Amor</title>
+      <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+      <style>
+        body{font-family:'Caveat',cursive;max-width:600px;margin:60px auto;padding:40px;
+             background:#fdf6e3;color:#3d2b1f;font-size:1.2rem;line-height:2;
+             border:1px solid #e8d5b0;box-shadow:0 4px 24px rgba(0,0,0,.12)}
+        h1{text-align:center;font-size:1.8rem;color:#c9184a;margin-bottom:30px}
+        .to{margin-bottom:16px} .body{white-space:pre-wrap}
+        .from{margin-top:24px;text-align:right}
+        .seal{text-align:center;font-size:2.5rem;margin-top:20px}
+      </style></head><body>
+      <h1>💌 Carta de Amor</h1>
+      <p class="to">${to}</p>
+      <p class="body">${body}</p>
+      <p class="from">${from}</p>
+      <p class="seal">💋</p>
+      </body></html>`);
+    win.document.close(); win.print();
+  }
+  </script>
+</body>
+</html>
+<html>
+  <head>
+    <title>Meu site</title>
+  </head>
+
+  <body>
+
+    <!-- SEU CONTEÚDO (inputs, botões, etc) -->
+    <input id="nome" placeholder="Nome">
+    <input id="email" placeholder="Email">
+    <button onclick="salvar()">Salvar</button>
+
+    <!-- 🔥 AQUI ENTRA O CÓDIGO (ANTES DO </body>) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+      const supabaseUrl = "SUA_URL";
+      const supabaseKey = "SUA_KEY";
+
+      const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+      async function salvar() {
+        const nome = document.getElementById("nome").value;
+        const email = document.getElementById("email").value;
+
+        const { error } = await supabase
+          .from("meu_amorzin")
+          .insert([{ nome, email }]);
+
+        if (error) {
+          alert("Erro: " + error.message);
+        } else {
+          alert("Salvo com sucesso!");
+        }
+      }
+    </script>
+
+  </body>
+</html>
